@@ -5,157 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Operator 112 — PoC</title>
   <style>
-    :root {
-      color-scheme: dark;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #111827;
-      color: #e5e7eb;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #1f2937 0, #111827 55%, #030712 100%);
-    }
-
-    #app {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
-      gap: 20px;
-      align-items: start;
-    }
-
-    .panel,
-    .map-panel,
-    .card {
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      border-radius: 18px;
-      background: rgba(15, 23, 42, 0.82);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
-    }
-
-    .panel,
-    .map-panel {
-      padding: 20px;
-    }
-
-    .card {
-      padding: 14px;
-      margin: 12px 0;
-      background: rgba(30, 41, 59, 0.86);
-    }
-
-    .result {
-      border-color: rgba(34, 197, 94, 0.45);
-    }
-
-    .city-map {
-      position: relative;
-      min-height: 540px;
-      overflow: hidden;
-      border-radius: 16px;
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      background:
-        linear-gradient(90deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
-        linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(59, 130, 246, 0.10));
-      background-size: 48px 48px, 48px 48px, cover;
-    }
-
-    .incident-marker,
-    .unit-marker {
-      position: absolute;
-      display: grid;
-      place-items: center;
-      width: 34px;
-      height: 34px;
-      transform: translate(-50%, -50%);
-      border-radius: 999px;
-      font-weight: 800;
-      color: white;
-      user-select: none;
-    }
-
-    .incident-marker {
-      background: #ef4444;
-      box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.18);
-    }
-
-    .unit-marker {
-      background: #2563eb;
-      box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.18);
-    }
-
-    button {
-      width: 100%;
-      margin: 6px 0;
-      padding: 11px 14px;
-      border: 0;
-      border-radius: 12px;
-      background: #2563eb;
-      color: white;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #1d4ed8;
-    }
-
-    h1,
-    h2,
-    h3 {
-      margin-top: 0;
-    }
-
-    p {
-      color: #cbd5e1;
-      line-height: 1.5;
-    }
-
-    .meta {
-      font-size: 0.92rem;
-      color: #94a3b8;
-    }
-
-    @media (max-width: 860px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-    }
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #111827; color: #e5e7eb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top, #1f2937 0, #111827 55%, #030712 100%); }
+    #app { max-width: 1180px; margin: 0 auto; padding: 24px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr); gap: 20px; align-items: start; }
+    .panel, .map-panel, .card { border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 18px; background: rgba(15, 23, 42, 0.82); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25); }
+    .panel, .map-panel { padding: 20px; }
+    .card { padding: 14px; margin: 12px 0; background: rgba(30, 41, 59, 0.86); }
+    .result { border-color: rgba(34, 197, 94, 0.45); }
+    .city-map { position: relative; min-height: 590px; overflow: hidden; border-radius: 16px; border: 1px solid rgba(148, 163, 184, 0.28); background: linear-gradient(90deg, rgba(148, 163, 184, 0.11) 1px, transparent 1px), linear-gradient(0deg, rgba(148, 163, 184, 0.11) 1px, transparent 1px), linear-gradient(135deg, rgba(6, 78, 59, 0.38), rgba(15, 23, 42, 0.94) 60%, rgba(30, 41, 59, 0.92)); background-size: 48px 48px, 48px 48px, cover; }
+    .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .district { opacity: 0.33; stroke: rgba(226, 232, 240, 0.32); stroke-width: 0.5; }
+    .road-main { stroke: rgba(226, 232, 240, 0.72); stroke-width: 2.2; stroke-linecap: round; }
+    .road-secondary { stroke: rgba(148, 163, 184, 0.58); stroke-width: 1.35; stroke-linecap: round; }
+    .road-local { stroke: rgba(148, 163, 184, 0.42); stroke-width: 0.9; stroke-linecap: round; stroke-dasharray: 2 2; }
+    .district-label { fill: rgba(226, 232, 240, 0.70); font-size: 3.2px; font-weight: 700; text-anchor: middle; }
+    .station-label { fill: rgba(226, 232, 240, 0.76); font-size: 2.8px; font-weight: 700; text-anchor: middle; }
+    .incident-marker, .unit-marker, .station-marker { position: absolute; display: grid; place-items: center; transform: translate(-50%, -50%); border-radius: 999px; font-weight: 800; color: white; user-select: none; z-index: 2; }
+    .incident-marker { width: 38px; height: 38px; background: #ef4444; box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.18), 0 0 0 18px rgba(239, 68, 68, 0.08); }
+    .unit-marker { width: 34px; height: 34px; background: #2563eb; box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.18); }
+    .station-marker { width: 24px; height: 24px; background: rgba(15, 23, 42, 0.92); border: 2px solid rgba(226, 232, 240, 0.75); font-size: 0.75rem; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; color: #cbd5e1; font-size: 0.86rem; }
+    .legend span { padding: 6px 9px; border: 1px solid rgba(148, 163, 184, 0.22); border-radius: 999px; background: rgba(15, 23, 42, 0.55); }
+    button { width: 100%; margin: 6px 0; padding: 11px 14px; border: 0; border-radius: 12px; background: #2563eb; color: white; font-weight: 700; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    h1, h2, h3 { margin-top: 0; }
+    p { color: #cbd5e1; line-height: 1.5; }
+    .meta { font-size: 0.92rem; color: #94a3b8; }
+    @media (max-width: 860px) { #app { padding: 16px; } .layout { grid-template-columns: 1fr; } .city-map { min-height: 64vh; } }
   </style>
 </head>
 <body>
   <div id="app"></div>
-
   <script>
     const ServiceType = {
       POLICE: { id: "POLICE", displayName: "Policja", marker: "P" },
       MEDICAL: { id: "MEDICAL", displayName: "Pogotowie", marker: "M" },
       FIRE: { id: "FIRE", displayName: "Straż pożarna", marker: "F" }
     };
-
-    const IncidentPriority = {
-      LOW: { displayName: "Niski", scoreMultiplier: 1 },
-      MEDIUM: { displayName: "Średni", scoreMultiplier: 2 },
-      HIGH: { displayName: "Wysoki", scoreMultiplier: 3 }
+    const IncidentPriority = { LOW: { displayName: "Niski", scoreMultiplier: 1 }, MEDIUM: { displayName: "Średni", scoreMultiplier: 2 }, HIGH: { displayName: "Wysoki", scoreMultiplier: 3 } };
+    const IncidentStatus = { NEW: "Nowe", RESOLVED: "Zakończone" };
+    const cityMap = {
+      districts: [
+        { id: "centrum", name: "Centrum", kind: "COMMERCIAL", x: 52, y: 36, r: 18, fill: "#3b82f6" },
+        { id: "osiedle", name: "Osiedle Północ", kind: "RESIDENTIAL", x: 27, y: 22, r: 16, fill: "#a855f7" },
+        { id: "przemysl", name: "Strefa przemysłowa", kind: "INDUSTRIAL", x: 76, y: 72, r: 20, fill: "#f59e0b" },
+        { id: "park", name: "Park miejski", kind: "PARK", x: 24, y: 74, r: 15, fill: "#22c55e" },
+        { id: "urzedy", name: "Rejon urzędowy", kind: "CIVIC", x: 68, y: 22, r: 12, fill: "#06b6d4" }
+      ],
+      roads: [
+        { name: "Aleja Centralna", from: { x: 50, y: 6 }, to: { x: 50, y: 94 }, cls: "road-main" },
+        { name: "Trasa Miejska", from: { x: 8, y: 42 }, to: { x: 92, y: 42 }, cls: "road-main" },
+        { name: "Łącznik Północny", from: { x: 24, y: 18 }, to: { x: 68, y: 24 }, cls: "road-secondary" },
+        { name: "Obwodnica Parkowa", from: { x: 18, y: 70 }, to: { x: 50, y: 88 }, cls: "road-secondary" },
+        { name: "Dojazd Przemysłowy", from: { x: 50, y: 62 }, to: { x: 82, y: 78 }, cls: "road-local" }
+      ],
+      stations: [
+        { name: "Komisariat Północ", service: ServiceType.POLICE, location: { x: 18, y: 22 } },
+        { name: "Stacja pogotowia Centrum", service: ServiceType.MEDICAL, location: { x: 50, y: 18 } },
+        { name: "Remiza Wschód", service: ServiceType.FIRE, location: { x: 78, y: 24 } }
+      ]
     };
-
-    const IncidentStatus = {
-      NEW: "Nowe",
-      RESOLVED: "Zakończone"
-    };
-
     const state = {
       nextIncidentNumber: 1,
       lastResult: null,
@@ -166,186 +77,37 @@
       ],
       incidents: []
     };
-
-    function distance(a, b) {
-      return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-    }
-
-    function registerIncident({ title, callerNote, requiredService, priority, location }) {
-      const incident = {
-        id: `incident-${state.nextIncidentNumber}`,
-        title,
-        callerNote,
-        requiredService,
-        priority,
-        status: IncidentStatus.NEW,
-        location
-      };
-      state.nextIncidentNumber += 1;
-      state.incidents.push(incident);
-      return incident;
-    }
-
+    function distance(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y); }
+    function registerIncident({ title, callerNote, requiredService, priority, location }) { const incident = { id: `incident-${state.nextIncidentNumber}`, title, callerNote, requiredService, priority, status: IncidentStatus.NEW, location }; state.nextIncidentNumber += 1; state.incidents.push(incident); return incident; }
     function createDemoIncident() {
       const variant = state.nextIncidentNumber % 3;
-      if (variant === 1) {
-        return registerIncident({
-          title: "Kolizja na skrzyżowaniu",
-          callerNote: "Zgłaszający mówi o zablokowanym pasie i jednej osobie z bólem ręki.",
-          requiredService: ServiceType.MEDICAL,
-          priority: IncidentPriority.MEDIUM,
-          location: { x: 72, y: 34 }
-        });
-      }
-      if (variant === 2) {
-        return registerIncident({
-          title: "Podejrzane zachowanie przy sklepie",
-          callerNote: "Pracownik ochrony prosi o patrol w pobliżu wejścia.",
-          requiredService: ServiceType.POLICE,
-          priority: IncidentPriority.LOW,
-          location: { x: 25, y: 70 }
-        });
-      }
-      return registerIncident({
-        title: "Dym z klatki schodowej",
-        callerNote: "Mieszkaniec widzi dym i czuje zapach spalenizny.",
-        requiredService: ServiceType.FIRE,
-        priority: IncidentPriority.HIGH,
-        location: { x: 82, y: 78 }
-      });
+      if (variant === 1) return registerIncident({ title: "Kolizja na skrzyżowaniu", callerNote: "Zgłaszający mówi o zablokowanym pasie i jednej osobie z bólem ręki.", requiredService: ServiceType.MEDICAL, priority: IncidentPriority.MEDIUM, location: { x: 72, y: 34 } });
+      if (variant === 2) return registerIncident({ title: "Podejrzane zachowanie przy sklepie", callerNote: "Pracownik ochrony prosi o patrol w pobliżu wejścia.", requiredService: ServiceType.POLICE, priority: IncidentPriority.LOW, location: { x: 25, y: 70 } });
+      return registerIncident({ title: "Dym z klatki schodowej", callerNote: "Mieszkaniec widzi dym i czuje zapach spalenizny.", requiredService: ServiceType.FIRE, priority: IncidentPriority.HIGH, location: { x: 82, y: 78 } });
     }
-
-    function dispatchUnit(unitId, incidentId) {
-      const unit = state.units.find((item) => item.id === unitId);
-      const incident = state.incidents.find((item) => item.id === incidentId);
-      if (!unit || !incident) return;
-
-      const responseTimeSeconds = 30 + distance(unit.location, incident.location) * 4;
-      const matchedService = unit.serviceType.id === incident.requiredService.id;
-      const baseScore = matchedService ? 100 : 35;
-      const timePenalty = Math.floor(responseTimeSeconds / 20);
-      const score = Math.max(0, baseScore * incident.priority.scoreMultiplier - timePenalty);
-
-      incident.status = IncidentStatus.RESOLVED;
-      unit.location = { ...incident.location };
-      unit.status = "Dostępna";
-
-      state.lastResult = {
-        incidentId: incident.id,
-        unitId: unit.id,
-        matchedService,
-        responseTimeSeconds,
-        score,
-        message: matchedService
-          ? "Dobrano właściwą służbę. Zdarzenie zakończone."
-          : "Wysłano niewłaściwą służbę. Zdarzenie zakończone z niską oceną."
-      };
-
-      render();
-    }
-
-    function el(tag, className, text) {
-      const node = document.createElement(tag);
-      if (className) node.className = className;
-      if (text !== undefined) node.textContent = text;
-      return node;
-    }
-
-    function button(label, onClick) {
-      const node = el("button", null, label);
-      node.addEventListener("click", onClick);
-      return node;
-    }
-
-    function marker(label, className, x, y, title) {
-      const node = el("div", className, label);
-      node.title = title;
-      node.style.left = `${x}%`;
-      node.style.top = `${y}%`;
-      return node;
-    }
-
-    function renderHeader(app) {
-      const panel = el("section", "panel");
-      panel.appendChild(el("h1", null, "Operator 112 — playable PoC"));
-      panel.appendChild(el("p", null, "Publiczna wersja testowa do uruchamiania przez GitHub Pages. To jest prosty placeholder mapy, nie finalny renderer 3D."));
-      panel.appendChild(el("p", "meta", "Źródło projektu: prywatne repo Puvshot/gra. Repo gra-play zawiera tylko publiczny build testowy."));
-      app.appendChild(panel);
-    }
-
+    function dispatchUnit(unitId, incidentId) { const unit = state.units.find((item) => item.id === unitId); const incident = state.incidents.find((item) => item.id === incidentId); if (!unit || !incident) return; const responseTimeSeconds = 30 + distance(unit.location, incident.location) * 4; const matchedService = unit.serviceType.id === incident.requiredService.id; const baseScore = matchedService ? 100 : 35; const score = Math.max(0, baseScore * incident.priority.scoreMultiplier - Math.floor(responseTimeSeconds / 20)); incident.status = IncidentStatus.RESOLVED; unit.location = { ...incident.location }; unit.status = "Dostępna"; state.lastResult = { matchedService, responseTimeSeconds, score, message: matchedService ? "Dobrano właściwą służbę. Zdarzenie zakończone." : "Wysłano niewłaściwą służbę. Zdarzenie zakończone z niską oceną." }; render(); }
+    function el(tag, className, text) { const node = document.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; }
+    function button(label, onClick) { const node = el("button", null, label); node.addEventListener("click", onClick); return node; }
+    function marker(label, className, x, y, title) { const node = el("div", className, label); node.title = title; node.style.left = `${x}%`; node.style.top = `${y}%`; return node; }
+    function svgEl(tag, attrs) { const node = document.createElementNS("http://www.w3.org/2000/svg", tag); Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value)); return node; }
+    function renderHeader(app) { const panel = el("section", "panel"); panel.appendChild(el("h1", null, "Operator 112 — playable PoC")); panel.appendChild(el("p", null, "Publiczna wersja testowa do uruchamiania przez GitHub Pages. Mapa pokazuje pierwszy krok w stronę warstwowej mapy taktycznej miasta.")); panel.appendChild(el("p", "meta", "Źródło projektu: prywatne repo Puvshot/gra. Repo gra-play zawiera tylko publiczny build testowy.")); app.appendChild(panel); }
     function renderMap(parent) {
-      const panel = el("section", "map-panel");
-      panel.appendChild(el("h2", null, "Mapa testowa miasta"));
-      const map = el("div", "city-map");
-
-      state.incidents.forEach((incident) => {
-        map.appendChild(marker("!", "incident-marker", incident.location.x, incident.location.y, incident.title));
-      });
-
-      state.units.forEach((unit) => {
-        map.appendChild(marker(unit.serviceType.marker, "unit-marker", unit.location.x, unit.location.y, unit.name));
-      });
-
-      panel.appendChild(map);
-      parent.appendChild(panel);
+      const panel = el("section", "map-panel"); panel.appendChild(el("h2", null, "Mapa taktyczna miasta v1")); const map = el("div", "city-map");
+      const svg = svgEl("svg", { class: "map-svg", viewBox: "0 0 100 100", preserveAspectRatio: "none" });
+      cityMap.districts.forEach((d) => { svg.appendChild(svgEl("circle", { class: "district", cx: d.x, cy: d.y, r: d.r, fill: d.fill })); svg.appendChild(svgEl("text", { class: "district-label", x: d.x, y: d.y }, )); svg.lastChild.textContent = d.name; });
+      cityMap.roads.forEach((r) => svg.appendChild(svgEl("line", { class: r.cls, x1: r.from.x, y1: r.from.y, x2: r.to.x, y2: r.to.y })));
+      cityMap.stations.forEach((s) => { svg.appendChild(svgEl("text", { class: "station-label", x: s.location.x, y: s.location.y + 6 })); svg.lastChild.textContent = s.service.marker; });
+      map.appendChild(svg);
+      cityMap.stations.forEach((station) => map.appendChild(marker(station.service.marker, "station-marker", station.location.x, station.location.y, station.name)));
+      state.incidents.filter((incident) => incident.status !== IncidentStatus.RESOLVED).forEach((incident) => map.appendChild(marker("!", "incident-marker", incident.location.x, incident.location.y, incident.title)));
+      state.units.forEach((unit) => map.appendChild(marker(unit.serviceType.marker, "unit-marker", unit.location.x, unit.location.y, `${unit.name} — ${unit.status}`)));
+      panel.appendChild(map); const legend = el("div", "legend"); ["P/M/F = jednostki", "małe P/M/F = bazy", "! = aktywne zgłoszenie", "linie = drogi", "kolory = sektory"].forEach((item) => legend.appendChild(el("span", null, item))); panel.appendChild(legend); parent.appendChild(panel);
     }
-
-    function renderIncidentCard(parent, incident) {
-      const card = el("article", "card");
-      card.appendChild(el("h3", null, incident.title));
-      card.appendChild(el("p", null, incident.callerNote));
-      card.appendChild(el("p", null, `Priorytet: ${incident.priority.displayName} | Wymagana służba: ${incident.requiredService.displayName}`));
-      card.appendChild(el("p", null, `Lokalizacja: ${incident.location.x}, ${incident.location.y}`));
-      parent.appendChild(card);
-    }
-
-    function renderResult(parent) {
-      if (!state.lastResult) return;
-      const card = el("article", "card result");
-      card.appendChild(el("h3", null, "Wynik interwencji"));
-      card.appendChild(el("p", null, state.lastResult.message));
-      card.appendChild(el("p", null, `Czas reakcji: ${state.lastResult.responseTimeSeconds}s | Wynik: ${state.lastResult.score} pkt`));
-      parent.appendChild(card);
-    }
-
-    function renderControls(parent) {
-      const panel = el("section", "panel");
-      panel.appendChild(el("h2", null, "Panel operatora"));
-
-      const activeIncident = [...state.incidents].reverse().find((incident) => incident.status !== IncidentStatus.RESOLVED);
-
-      if (!activeIncident) {
-        panel.appendChild(el("p", null, "Brak aktywnego zdarzenia."));
-        panel.appendChild(button("Przyjmij kolejne zgłoszenie", () => {
-          createDemoIncident();
-          render();
-        }));
-      } else {
-        renderIncidentCard(panel, activeIncident);
-        panel.appendChild(el("h3", null, "Wyślij jednostkę"));
-        state.units.forEach((unit) => {
-          panel.appendChild(button(`${unit.name} — ${unit.serviceType.displayName}`, () => {
-            dispatchUnit(unit.id, activeIncident.id);
-          }));
-        });
-      }
-
-      renderResult(panel);
-      parent.appendChild(panel);
-    }
-
-    function render() {
-      const app = document.getElementById("app");
-      app.innerHTML = "";
-      renderHeader(app);
-      const layout = el("main", "layout");
-      renderMap(layout);
-      renderControls(layout);
-      app.appendChild(layout);
-    }
-
-    createDemoIncident();
-    render();
+    function renderIncidentCard(parent, incident) { const card = el("article", "card"); card.appendChild(el("h3", null, incident.title)); card.appendChild(el("p", null, incident.callerNote)); card.appendChild(el("p", null, `Priorytet: ${incident.priority.displayName} | Wymagana służba: ${incident.requiredService.displayName}`)); card.appendChild(el("p", null, `Lokalizacja: ${incident.location.x}, ${incident.location.y}`)); parent.appendChild(card); }
+    function renderResult(parent) { if (!state.lastResult) return; const card = el("article", "card result"); card.appendChild(el("h3", null, "Wynik interwencji")); card.appendChild(el("p", null, state.lastResult.message)); card.appendChild(el("p", null, `Czas reakcji: ${state.lastResult.responseTimeSeconds}s | Wynik: ${state.lastResult.score} pkt`)); parent.appendChild(card); }
+    function renderControls(parent) { const panel = el("section", "panel"); panel.appendChild(el("h2", null, "Panel operatora")); const activeIncident = [...state.incidents].reverse().find((incident) => incident.status !== IncidentStatus.RESOLVED); if (!activeIncident) { panel.appendChild(el("p", null, "Brak aktywnego zdarzenia.")); panel.appendChild(button("Przyjmij kolejne zgłoszenie", () => { createDemoIncident(); render(); })); } else { renderIncidentCard(panel, activeIncident); panel.appendChild(el("h3", null, "Wyślij jednostkę")); state.units.forEach((unit) => panel.appendChild(button(`${unit.name} — ${unit.serviceType.displayName}`, () => dispatchUnit(unit.id, activeIncident.id)))); } renderResult(panel); parent.appendChild(panel); }
+    function render() { const app = document.getElementById("app"); app.innerHTML = ""; renderHeader(app); const layout = el("main", "layout"); renderMap(layout); renderControls(layout); app.appendChild(layout); }
+    createDemoIncident(); render();
   </script>
 </body>
 </html>
